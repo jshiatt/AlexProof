@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Domain.Interfaces;
+using Domain.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -11,11 +13,23 @@ namespace AlexProof.Controllers
     [Route("[controller]")]
     public class OrdersController : ControllerBase
     {
+        private readonly IOrdersRepository _orderRepository;
+        public OrdersController(IOrdersRepository ordersRepository)
+        {
+            _orderRepository = ordersRepository;
+        }
 
-        //[HttpGet]
-        //public OrderDetailList GetOrders()
-        //{
+        [HttpPost]
+        [Route("search")]
+        public OrderDetailList FindOrders([FromBody] FindOrders filters)
+        {
+            return _orderRepository.FindOrders(filters);
+        }
 
-        //}
+        [HttpPost]
+        public OrderDetail CreateOrder([FromBody] CreateOrder command)
+        {
+            return _orderRepository.CreateOrder(command);
+        }
     }
 }

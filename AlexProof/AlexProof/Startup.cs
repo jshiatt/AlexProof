@@ -1,4 +1,6 @@
 using DataAccess;
+using DataAccess.Repositories;
+using Domain.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -36,6 +38,8 @@ namespace AlexProof
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "AlexProof", Version = "v1" });
             });
+            services.AddTransient(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            services.AddTransient<IOrdersRepository, OrdersRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
