@@ -18,6 +18,7 @@ namespace Domain.Models
         public OrderType OrderType { get; set; }
         public string CustomerName { get; set; }
         public DateTime CreateDateTime { get; set; }
+        public DateTime? UpdateDateTime { get; set; }
     }
     public class FindOrders
     {

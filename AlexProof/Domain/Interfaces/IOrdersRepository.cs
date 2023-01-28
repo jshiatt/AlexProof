@@ -12,5 +12,7 @@ namespace Domain.Interfaces
     {
         OrderDetailList FindOrders(FindOrders filters);
         OrderDetail CreateOrder(CreateOrder command);
+        OrderDetail UpdateOrder(Guid id, UpdateOrder command);
+        void DeleteOrder(Guid id);
     }
 }

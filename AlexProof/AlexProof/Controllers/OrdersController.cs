@@ -31,5 +31,18 @@ namespace AlexProof.Controllers
         {
             return _orderRepository.CreateOrder(command);
         }
+
+        [HttpPut("{id}")]
+        public OrderDetail UpdateOrder([FromRoute] Guid id, [FromBody] UpdateOrder command)
+        {
+            return _orderRepository.UpdateOrder(id, command);
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult DeleteOrder([FromRoute] Guid id)
+        {
+            _orderRepository.DeleteOrder(id);
+            return Ok();
+        }
     }
 }

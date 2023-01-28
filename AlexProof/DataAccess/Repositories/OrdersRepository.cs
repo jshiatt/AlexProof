@@ -27,7 +27,8 @@ namespace DataAccess.Repositories
                 Id = o.Id,
                 OrderType = o.OrderType,
                 CustomerName = o.CustomerName,
-                CreateDateTime = o.CreateDateTime
+                CreateDateTime = o.CreateDateTime,
+                UpdateDateTime = o.UpdateDateTime
             }).OrderByDescending(obd => obd.CreateDateTime)
             .Skip((filters.Page - 1) * filters.PageSize).Take(filters.PageSize)
             .ToList();
@@ -51,22 +52,61 @@ namespace DataAccess.Repositories
 
             Add(newOrder);
 
-            _context.SaveChanges();
-
-            Order createdOrder = GetById(newOrder.Id);
-
-            if (createdOrder != null)
+            if (_context.SaveChanges() == 0)
             {
-                return new OrderDetail
-                {
-                    Id = createdOrder.Id,
-                    OrderType = createdOrder.OrderType,
-                    CustomerName = createdOrder.CustomerName,
-                    CreateDateTime = createdOrder.CreateDateTime
-                };
+                throw new Exception("Failed to create order");
             }
 
-            throw new Exception("Failed to create order");
+            return new OrderDetail
+            {
+                Id = newOrder.Id,
+                OrderType = newOrder.OrderType,
+                CustomerName = newOrder.CustomerName,
+                CreateDateTime = newOrder.CreateDateTime
+            };
+        }
+
+        public OrderDetail UpdateOrder(Guid id, UpdateOrder command)
+        {
+            Order existing = GetById(id);
+            if (existing == null)
+            {
+                throw new Exception("Order does not exist");
+            }
+
+            existing.OrderType = command.OrderType ?? existing.OrderType;
+            existing.CustomerName = command.CustomerName ?? existing.CustomerName;
+            existing.UpdateDateTime = DateTime.Now;
+
+            if (_context.SaveChanges() == 0)
+            {
+                throw new Exception("Failed to update order");
+            }
+
+            return new OrderDetail
+            {
+                Id = existing.Id,
+                OrderType = existing.OrderType,
+                CustomerName = existing.CustomerName,
+                CreateDateTime = existing.CreateDateTime,
+                UpdateDateTime = existing.UpdateDateTime
+            };
+        }
+
+        public void DeleteOrder(Guid id)
+        {
+            Order existing = GetById(id);
+            if (existing == null)
+            {
+                throw new Exception("Order does not exist");
+            }
+
+            _context.Remove(existing);
+
+            if (_context.SaveChanges() == 0)
+            {
+                throw new Exception("Unable to delete order");
+            }
         }
     }
 }
