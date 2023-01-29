@@ -3,10 +3,12 @@ using DataAccess.Repositories;
 using Domain.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,11 +17,16 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
+using Newtonsoft.Json;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Net;
+using System.Runtime.Serialization;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace AlexProof
@@ -58,7 +65,7 @@ namespace AlexProof
             services.AddDbContext<Context>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("orderDb"),
                 b => b.MigrationsAssembly(typeof(Context).Assembly.FullName)));
-            services.AddSingleton<UserContext>();
+            services.AddScoped<UserContext>();
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
@@ -118,7 +125,6 @@ namespace AlexProof
         {
             if (operation.Security == null)
                 operation.Security = new List<OpenApiSecurityRequirement>();
-
 
             var scheme = new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "bearer" } };
             operation.Security.Add(new OpenApiSecurityRequirement
@@ -200,5 +206,94 @@ namespace AlexProof
             arr.AddRange(names);
             parameter.Extensions.Add("x-enum-varnames2", arr);
         }
+    }
+
+    public class CustomAuthAttribute : TypeFilterAttribute
+    {
+        public CustomAuthAttribute() : base(typeof(CustomAuthAttributeImpl)) { }
+        private class CustomAuthAttributeImpl : Attribute, IAsyncResourceFilter
+        {
+            private readonly IUsersRepository _usersRepository;
+            private UserContext _userContext;
+
+            public CustomAuthAttributeImpl(IUsersRepository usersRepository, UserContext userContext)
+            {
+                _usersRepository = usersRepository;
+                _userContext = userContext;
+            }
+
+            public async Task OnResourceExecutionAsync(ResourceExecutingContext context, ResourceExecutionDelegate next)
+            {
+                string bearer = "";
+                var authHeaders = context.HttpContext.Request.Headers["Authorization"];
+                if (authHeaders.Count < 1)
+                {
+                    var exception = new ExceptionDetails
+                    {
+                        Message = "No Bearer Token",
+                        Content = new ExceptionDetailsContent
+                        {
+                            Exception = new Exception("No Token"),
+                            Request = new ExceptionDetailsRequest
+                            {
+                                Method = context.HttpContext.Request.Method,
+                                ContentType = context.HttpContext.Request.ContentType,
+                                Path = context.HttpContext.Request.Path,
+                                QueryString = context.HttpContext.Request.QueryString.Value
+                            }
+                        }
+                    };
+                    context.Result = new ContentResult
+                    {
+                        Content = JsonConvert.SerializeObject(exception),
+                        ContentType = "text/json",
+                        StatusCode = (int)HttpStatusCode.Unauthorized
+                    };
+                }
+                else
+                {
+                    if (_userContext.CurrentUser == null)
+                    {
+                        bearer = Regex.Replace(authHeaders[0], @"^bearer\s?(\S*)$", "$1", RegexOptions.IgnoreCase);
+                        var jwt = new JwtSecurityToken(bearer);
+                        if (jwt.ValidFrom < DateTime.UtcNow && DateTime.UtcNow < jwt.ValidTo)
+                        {
+                            var user = _usersRepository.CreateUserFromBearerToken(bearer);
+                            if (user != null)
+                            {
+                                _userContext.Intialize(user);
+                                await next();
+                            }
+                        }
+                        context.Result = new ContentResult
+                        {
+                            StatusCode = (int)HttpStatusCode.Unauthorized
+                        };
+                    }
+                }
+            }
+        }
+    }
+
+    public class ExceptionDetails
+    {
+        public string Message { get; set; }
+        public ExceptionDetailsContent Content { get; set; }
+        public DateTime ExceptionTime { get; } = DateTime.Now;
+        public Guid ErrorId { get; } = Guid.NewGuid();
+    }
+
+    public class ExceptionDetailsContent
+    {
+        public Exception Exception { get; set; }
+        public ExceptionDetailsRequest Request { get; set; }
+    }
+
+    public class ExceptionDetailsRequest
+    {
+        public string Method { get; set; }
+        public string ContentType { get; set; }
+        public string Path { get; set; }
+        public string QueryString { get; set; }
     }
 }

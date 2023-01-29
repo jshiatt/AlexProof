@@ -13,5 +13,6 @@ namespace Domain.Interfaces
         UserLogin CreateUser(CreateUser command);
         UserLogin Login(CreateUser command);
         string GetCurrentUser();
+        User CreateUserFromBearerToken(string bearer);
     }
 }

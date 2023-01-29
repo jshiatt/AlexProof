@@ -13,7 +13,7 @@ namespace AlexProof.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [CustomAuth]
     public class OrdersController : ControllerBase
     {
         private readonly IOrdersRepository _orderRepository;

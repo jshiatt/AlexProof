@@ -32,7 +32,7 @@ namespace DataAccess.Repositories
             return str;
         }
 
-        public string GetToken(string userName)
+        public string GetToken(User user)
         {
             var issuer = _configuration["Jwt:Issuer"];
             var audience = _configuration["Jwt:Audience"];
@@ -42,9 +42,9 @@ namespace DataAccess.Repositories
             {
                 Subject = new ClaimsIdentity(new[]
                 {
-                new Claim("Id", Guid.NewGuid().ToString()),
-                new Claim(JwtRegisteredClaimNames.Sub, userName),
-                new Claim(JwtRegisteredClaimNames.Email, userName),
+                new Claim("nameidentifier", user.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
+                new Claim(JwtRegisteredClaimNames.Email, user.UserName),
                 new Claim(JwtRegisteredClaimNames.Jti,
                 Guid.NewGuid().ToString())
              }),
@@ -97,8 +97,7 @@ namespace DataAccess.Repositories
                 throw new Exception("Unable to create user");
             }
 
-            var stringToken = GetToken(newUser.UserName);
-            _userContext.Intialize(newUser);
+            var stringToken = GetToken(newUser);
 
             return new UserLogin
             {
@@ -122,8 +121,7 @@ namespace DataAccess.Repositories
                 throw new Exception("Invalid login credentials");
             }
 
-            var token = GetToken(user.UserName);
-            _userContext.Intialize(user);
+            var token = GetToken(user);
 
             return new UserLogin
             {
@@ -135,6 +133,29 @@ namespace DataAccess.Repositories
         public string GetCurrentUser()
         {
             return _userContext.CurrentUser.UserName;
+        }
+
+        public User CreateUserFromBearerToken(string bearer)
+        {
+            var userId = new Guid(GetClaimFromJwt(bearer, "nameidentifier"));
+            User user = _context.Set<User>().FirstOrDefault(f => f.Id == userId);
+            if (user == null)
+            {
+                throw new Exception("User not found");
+            }
+            return user;
+        }
+
+        public string GetClaimFromJwt(string jwt, string claimName)
+        {
+            var jwtHandler = new JwtSecurityTokenHandler();
+            jwtHandler.ReadJwtToken(jwt);
+            if (jwtHandler.CanReadToken(jwt))
+            {
+                var token = jwtHandler.ReadJwtToken(jwt);
+                return token.Claims.FirstOrDefault(f => f.Type == claimName).Value;
+            }
+            return null;
         }
     }
 }

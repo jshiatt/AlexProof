@@ -37,7 +37,7 @@ namespace AlexProof.Controllers
         }
 
         [HttpGet]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [CustomAuth]
         public string GetCurrentUser()
         {
             return _usersRepository.GetCurrentUser();

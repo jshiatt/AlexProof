@@ -1,6 +1,6 @@
 import React from "react";
 import Grid from "@mui/material/Grid";
-import { OrdersApi, OrderType } from "../../../api/src";
+import { OrderDetail, OrdersApi, OrderType } from "../../../api/src";
 import { call } from "../../../api/callWrapper";
 import { useQuery } from "react-query";
 import { PageContainer } from "../../components";
@@ -14,6 +14,8 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import { useOrderState, useOrderDispatch } from "./orderContext";
+import OrderList from "./OrderList";
+import Button from "@mui/material/Button";
 
 const orderTypeOptions = (Object.keys(OrderType).filter((s) => isNaN(Number(s))) as (keyof typeof OrderType)[]).map(
   (key) => ({
@@ -25,20 +27,24 @@ const orderTypeOptions = (Object.keys(OrderType).filter((s) => isNaN(Number(s)))
 export default function OrdersList() {
   const state = useOrderState();
   const dispatch = useOrderDispatch();
-  const { data } = useQuery(
+  const [checkedOrders, setCheckedOrders] = React.useState<OrderDetail[]>([]);
+  const { data: orders } = useQuery(
     ["orders", state.filters],
     async () => {
       return await call(OrdersApi).ordersSearchPost({ findOrders: { ...state.filters } });
     },
     {
       refetchOnWindowFocus: false,
+      onSuccess: () => {
+        setCheckedOrders([]);
+      },
     },
   );
 
   return (
     <PageContainer>
       <Grid container direction="column" sx={{ flex: "1 1 auto", padding: "20px" }}>
-        <Grid container alignItems="center">
+        <Grid container alignItems="center" wrap="nowrap">
           <TextField
             variant="outlined"
             label="Search"
@@ -90,6 +96,28 @@ export default function OrdersList() {
               ))}
             </Select>
           </FormControl>
+          <Grid item sx={{ marginLeft: "auto" }}>
+            <Grid container sx={{ marginLeft: "auto" }}>
+              <Button variant="contained" color="primary" sx={{ marginRight: "12px" }}>
+                Add Order
+              </Button>
+              <Button variant="outlined" color="error" disabled={checkedOrders.length === 0}>
+                {`Delete Order(s) ${checkedOrders.length > 0 ? `(${checkedOrders.length})` : ""}`}
+              </Button>
+            </Grid>
+          </Grid>
+        </Grid>
+        <Grid
+          container
+          direction="column"
+          wrap="nowrap"
+          sx={{ flex: "1 1 auto", overflowY: "auto", padding: "20px", backgroundColor: "#EAEAEA" }}
+        >
+          <OrderList
+            orders={orders?.orders || undefined}
+            checkedOrders={checkedOrders}
+            setCheckedOrders={setCheckedOrders}
+          />
         </Grid>
       </Grid>
     </PageContainer>
