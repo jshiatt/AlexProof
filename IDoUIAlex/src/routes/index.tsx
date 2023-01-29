@@ -1,28 +1,52 @@
 import React from "react";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import {
+  createBrowserRouter,
+  RouterProvider,
+  Navigate,
+  useOutlet,
+  createRoutesFromElements,
+  Route,
+} from "react-router-dom";
 import OrdersList from "./orders";
 import { QueryClient, QueryClientProvider } from "react-query";
 import Grid from "@mui/material/Grid";
+import { useAuth, AuthProvider } from "../hooks/AuthProvider";
 
-const router = createBrowserRouter([
-  {
-    path: "/orders",
-    element: <OrdersList />,
-  },
-]);
+const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
+  const { token } = useAuth();
+  if (!token) {
+    return <Navigate to="/" />;
+  }
+  return children;
+};
+
+const AuthLayout = () => {
+  const outlet = useOutlet();
+  return <AuthProvider>{outlet}</AuthProvider>;
+};
+
+const router = createBrowserRouter(
+  createRoutesFromElements(
+    <Route element={<AuthLayout />} path="/">
+      <Route
+        element={
+          <ProtectedRoute>
+            <OrdersList />
+          </ProtectedRoute>
+        }
+        path="/orders"
+      />
+    </Route>,
+  ),
+);
 
 const queryClient = new QueryClient();
 
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Grid container direction="column" style={{ height: "100%" }} wrap="nowrap">
-        <Grid container style={{ height: "56px", borderBottom: "1px solid #C4C4C4" }}>
-          hi
-        </Grid>
-        <Grid container style={{ flex: "1 1 auto" }}>
-          <RouterProvider router={router} />
-        </Grid>
+      <Grid container style={{ flex: "1 1 auto" }}>
+        <RouterProvider router={router} />
       </Grid>
     </QueryClientProvider>
   );

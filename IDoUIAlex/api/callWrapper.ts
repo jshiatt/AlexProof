@@ -9,10 +9,10 @@ const unauthenticatedResponseHandlerMiddleware: Middleware = {
   post: async (context: ResponseContext): Promise<Response | void> => {
     if (context.response.status === 401) {
       console.warn("Received 401 from API, redirecting to login service"); // tslint:disable-line no-console
-      // if (document.location) {
-      //   (window as any).tokenManager.removeTokenFromLocalStorage();
-      //   document.location.href = "/login";
-      // }
+      if (document.location) {
+        window.localStorage.setItem("token", "")
+        document.location.href = "/";
+      }
     }
   },
 };
@@ -22,7 +22,7 @@ const call = <T extends BaseAPI>(api: ApiConstructor<T>): T => {
     new Configuration({
       fetchApi: Fetch.fetch,
       basePath: config.basePath,
-      // accessToken: config.apiKey,
+      accessToken: config.apiKey,
       middleware: [unauthenticatedResponseHandlerMiddleware],
     }),
   );

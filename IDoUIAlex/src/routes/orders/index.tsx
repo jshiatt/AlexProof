@@ -3,6 +3,7 @@ import Grid from "@mui/material/Grid";
 import { OrdersApi } from "../../../api/src";
 import { call } from "../../../api/callWrapper";
 import { useQuery } from "react-query";
+import { PageContainer } from "../../components";
 
 export default function OrdersList() {
   const { data } = useQuery(["orders"], async () => {
@@ -10,8 +11,8 @@ export default function OrdersList() {
   });
 
   return (
-    <Grid>
-      <div>hi</div>
-    </Grid>
+    <PageContainer>
+      <Grid container>hi</Grid>
+    </PageContainer>
   );
 }
