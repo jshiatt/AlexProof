@@ -36,6 +36,7 @@ export default function OrdersList() {
   const dispatch = useOrderDispatch();
   const [checkedOrders, setCheckedOrders] = React.useState<OrderDetail[]>([]);
   const [open, setOpen] = React.useState(false);
+  const [edit, setEdit] = React.useState<OrderDetail | undefined>(undefined);
   const [deleteOpen, setDeleteOpen] = React.useState(false);
   const theme = useTheme();
   const small = useMediaQuery(theme.breakpoints.down("md"));
@@ -153,10 +154,12 @@ export default function OrdersList() {
             orders={orders?.orders || undefined}
             checkedOrders={checkedOrders}
             setCheckedOrders={setCheckedOrders}
+            setEdit={setEdit}
+            setEditOpen={setOpen}
           />
         </Grid>
       </Grid>
-      <AddOrder open={open} setOpen={setOpen} />
+      <AddOrder open={open} setOpen={setOpen} edit={edit} setEdit={setEdit} />
       <DeleteOrders
         open={deleteOpen}
         setOpen={setDeleteOpen}

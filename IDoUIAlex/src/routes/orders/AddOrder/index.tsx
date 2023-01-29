@@ -14,13 +14,15 @@ import MenuItem from "@mui/material/MenuItem";
 import Button from "@mui/material/Button";
 import Close from "@mui/icons-material/Close";
 import { useMutation, useQueryClient } from "react-query";
-import { OrdersApi, CreateOrder, OrderType } from "../../../../api/src";
+import { OrdersApi, CreateOrder, OrderType, OrderDetail } from "../../../../api/src";
 import { call } from "../../../../api/callWrapper";
 import { Setter } from "../../../types/setter";
 
 interface AddOrderProps {
   open: boolean;
   setOpen: Setter<boolean>;
+  edit?: OrderDetail;
+  setEdit: Setter<OrderDetail | undefined>;
 }
 
 const orderTypeOptions = (Object.keys(OrderType).filter((s) => isNaN(Number(s))) as (keyof typeof OrderType)[]).map(
@@ -30,7 +32,7 @@ const orderTypeOptions = (Object.keys(OrderType).filter((s) => isNaN(Number(s)))
   }),
 );
 
-export default function AddOrder({ open, setOpen }: AddOrderProps) {
+export default function AddOrder({ open, setOpen, edit, setEdit }: AddOrderProps) {
   const [create, setCreate] = React.useState<CreateOrder>({});
   const queryClient = useQueryClient();
 
@@ -47,11 +49,32 @@ export default function AddOrder({ open, setOpen }: AddOrderProps) {
     },
   );
 
+  const { mutate: editOrder, isLoading: editLoading } = useMutation(
+    async () => {
+      return await call(OrdersApi).ordersIdPut({ id: edit?.id || "", updateOrder: { ...create } });
+    },
+    {
+      onSuccess: () => {
+        setCreate({});
+        setEdit(undefined);
+        setOpen(false);
+        queryClient.invalidateQueries("orders");
+      },
+    },
+  );
+
+  React.useEffect(() => {
+    if (edit) {
+      setCreate({ customerName: edit.customerName, orderType: edit.orderType });
+    }
+  }, [edit]);
+
   return (
     <Dialog
       open={open}
       onClose={() => {
         setCreate({});
+        setEdit(undefined);
         setOpen(false);
       }}
       maxWidth="xs"
@@ -107,6 +130,7 @@ export default function AddOrder({ open, setOpen }: AddOrderProps) {
           sx={{ marginRight: "12px" }}
           onClick={() => {
             setCreate({});
+            setEdit(undefined);
             setOpen(false);
           }}
         >
@@ -115,10 +139,10 @@ export default function AddOrder({ open, setOpen }: AddOrderProps) {
         <Button
           variant="contained"
           color="primary"
-          disabled={!create.customerName || create.orderType === undefined || isLoading}
-          onClick={() => addOrder()}
+          disabled={!create.customerName || create.orderType === undefined || isLoading || editLoading}
+          onClick={() => (edit === undefined ? addOrder() : editOrder())}
         >
-          Add
+          {edit === undefined ? "Add" : "Edit"}
         </Button>
       </DialogActions>
     </Dialog>

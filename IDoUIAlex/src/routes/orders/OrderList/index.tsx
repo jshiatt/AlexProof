@@ -13,9 +13,11 @@ interface OrderListProps {
   orders?: OrderDetail[];
   checkedOrders: OrderDetail[];
   setCheckedOrders: Setter<OrderDetail[]>;
+  setEdit: Setter<OrderDetail | undefined>;
+  setEditOpen: Setter<boolean>;
 }
 
-export default function OrderList({ orders, checkedOrders, setCheckedOrders }: OrderListProps) {
+export default function OrderList({ orders, checkedOrders, setCheckedOrders, setEdit, setEditOpen }: OrderListProps) {
   return (
     <>
       {orders && orders.length > 0 ? (
@@ -63,7 +65,13 @@ export default function OrderList({ orders, checkedOrders, setCheckedOrders }: O
                       {o.updateUser ? `${o.updateUser} on ${moment(o.updateDateTime).format("MM/DD/YY")}` : "-"}
                     </Typography>
                   </Grid>
-                  <IconButton sx={{ marginLeft: "auto" }}>
+                  <IconButton
+                    sx={{ marginLeft: "auto" }}
+                    onClick={() => {
+                      setEdit(o);
+                      setEditOpen(true);
+                    }}
+                  >
                     <Edit />
                   </IconButton>
                 </Grid>
