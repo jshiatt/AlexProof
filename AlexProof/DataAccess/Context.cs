@@ -6,7 +6,7 @@ using System;
 
 namespace DataAccess
 {
-    public class Context : IdentityDbContext<IdentityUser>
+    public class Context : DbContext
     {
         public Context(DbContextOptions<Context> options) : base(options) { }
         public DbSet<Order> Orders { get; set; }

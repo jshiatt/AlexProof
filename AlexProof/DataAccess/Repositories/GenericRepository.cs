@@ -10,9 +10,11 @@ namespace DataAccess.Repositories
     public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
         protected readonly Context _context;
-        public GenericRepository(Context context)
+        protected readonly UserContext _userContext;
+        public GenericRepository(Context context, UserContext userContext)
         {
             _context = context;
+            _userContext = userContext;
         }
 
         public T GetById(Guid id)

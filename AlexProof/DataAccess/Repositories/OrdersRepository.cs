@@ -1,6 +1,7 @@
 ﻿using Domain.Entities;
 using Domain.Interfaces;
 using Domain.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,11 +12,11 @@ namespace DataAccess.Repositories
 {
     public class OrdersRepository : GenericRepository<Order>, IOrdersRepository
     {
-        public OrdersRepository(Context context) : base(context) { }
+        public OrdersRepository(Context context, UserContext userContext) : base(context, userContext) { }
 
         public OrderDetailList FindOrders(FindOrders filters)
         {
-            var orderQuery = _context.Set<Order>().AsQueryable();
+            var orderQuery = _context.Set<Order>().Include(o => o.CreateUser).Include(o => o.UpdateUser).AsQueryable();
 
             if (filters.OrderType.HasValue)
             {
@@ -28,7 +29,9 @@ namespace DataAccess.Repositories
                 OrderType = o.OrderType,
                 CustomerName = o.CustomerName,
                 CreateDateTime = o.CreateDateTime,
-                UpdateDateTime = o.UpdateDateTime
+                CreateUser = o.CreateUser.UserName,
+                UpdateDateTime = o.UpdateDateTime,
+                UpdateUser = o.UpdateUser.UserName
             }).OrderByDescending(obd => obd.CreateDateTime)
             .Skip((filters.Page - 1) * filters.PageSize).Take(filters.PageSize)
             .ToList();
@@ -47,7 +50,8 @@ namespace DataAccess.Repositories
                 Id = Guid.NewGuid(),
                 OrderType = command.OrderType,
                 CustomerName = command.CustomerName,
-                CreateDateTime = DateTime.Now
+                CreateDateTime = DateTime.Now,
+                CreateUserId = _userContext.CurrentUser.Id
             };
 
             Add(newOrder);
@@ -62,13 +66,14 @@ namespace DataAccess.Repositories
                 Id = newOrder.Id,
                 OrderType = newOrder.OrderType,
                 CustomerName = newOrder.CustomerName,
-                CreateDateTime = newOrder.CreateDateTime
+                CreateDateTime = newOrder.CreateDateTime,
+                CreateUser = _userContext.CurrentUser.UserName
             };
         }
 
         public OrderDetail UpdateOrder(Guid id, UpdateOrder command)
         {
-            Order existing = GetById(id);
+            Order existing = _context.Set<Order>().Include(o => o.CreateUser).Include(o => o.UpdateUser).FirstOrDefault(f => f.Id == id);
             if (existing == null)
             {
                 throw new Exception("Order does not exist");
@@ -77,6 +82,7 @@ namespace DataAccess.Repositories
             existing.OrderType = command.OrderType ?? existing.OrderType;
             existing.CustomerName = command.CustomerName ?? existing.CustomerName;
             existing.UpdateDateTime = DateTime.Now;
+            existing.UpdateUserId = _userContext.CurrentUser.Id;
 
             if (_context.SaveChanges() == 0)
             {
@@ -89,7 +95,9 @@ namespace DataAccess.Repositories
                 OrderType = existing.OrderType,
                 CustomerName = existing.CustomerName,
                 CreateDateTime = existing.CreateDateTime,
-                UpdateDateTime = existing.UpdateDateTime
+                CreateUser = existing.CreateUser.UserName,
+                UpdateDateTime = existing.UpdateDateTime,
+                UpdateUser = _userContext.CurrentUser.UserName
             };
         }
 

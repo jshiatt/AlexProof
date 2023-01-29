@@ -17,7 +17,7 @@ namespace DataAccess.Repositories
     public class UsersRepository : GenericRepository<User>, IUsersRepository
     {
         private readonly IConfiguration _configuration;
-        public UsersRepository(Context context, IConfiguration configuration) : base(context)
+        public UsersRepository(Context context, UserContext userContext, IConfiguration configuration) : base(context, userContext)
         {
             _configuration = configuration;
         }
@@ -98,6 +98,7 @@ namespace DataAccess.Repositories
             }
 
             var stringToken = GetToken(newUser.UserName);
+            _userContext.Intialize(newUser);
 
             return new UserLogin
             {
@@ -122,6 +123,8 @@ namespace DataAccess.Repositories
             }
 
             var token = GetToken(user.UserName);
+            _userContext.Intialize(user);
+
             return new UserLogin
             {
                 UserName = user.UserName,

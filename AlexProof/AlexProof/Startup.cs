@@ -57,6 +57,7 @@ namespace AlexProof
             services.AddDbContext<Context>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("orderDb"),
                 b => b.MigrationsAssembly(typeof(Context).Assembly.FullName)));
+            services.AddSingleton<UserContext>();
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
