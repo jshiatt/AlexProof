@@ -1,5 +1,6 @@
 ﻿using Domain.Interfaces;
 using Domain.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -33,6 +34,13 @@ namespace AlexProof.Controllers
         public UserLogin Login([FromBody] CreateUser command)
         {
             return _usersRepository.Login(command);
+        }
+
+        [HttpGet]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public string GetCurrentUser()
+        {
+            return _usersRepository.GetCurrentUser();
         }
     }
 }

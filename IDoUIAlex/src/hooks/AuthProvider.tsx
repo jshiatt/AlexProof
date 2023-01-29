@@ -11,6 +11,7 @@ type AuthContext = {
   creds: CreateUser;
   setCreds: Setter<CreateUser>;
   login: UseMutateFunction<void, unknown, void, unknown>;
+  loginLoading: boolean;
   logout: VoidFunction;
 };
 
@@ -39,9 +40,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       creds,
       setCreds,
       login,
+      loginLoading: isLoading,
       logout,
     }),
-    [storedValue],
+    [storedValue, creds, isLoading],
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

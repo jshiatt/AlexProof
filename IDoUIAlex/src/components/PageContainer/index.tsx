@@ -23,7 +23,9 @@ export default function PageContainer({ children }: { children: React.ReactNode 
             <Typography sx={{ color: "#212121" }}>Alex's Orders</Typography>
             <Grid sx={{ marginLeft: "auto" }}>
               <List component="nav">
-                <ListItemButton onClick={(e) => setAnchorEl(e.currentTarget)}>{creds.userName}</ListItemButton>
+                <ListItemButton onClick={(e) => setAnchorEl(e.currentTarget)}>
+                  <Typography sx={{ color: "#212121" }}>{creds.userName}</Typography>
+                </ListItemButton>
               </List>
             </Grid>
           </Toolbar>

@@ -131,5 +131,10 @@ namespace DataAccess.Repositories
                 Token = token
             };
         }
+
+        public string GetCurrentUser()
+        {
+            return _userContext.CurrentUser.UserName;
+        }
     }
 }

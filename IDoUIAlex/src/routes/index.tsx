@@ -8,12 +8,14 @@ import {
   Route,
 } from "react-router-dom";
 import OrdersList from "./orders";
+import Login from "./login";
 import { QueryClient, QueryClientProvider } from "react-query";
 import Grid from "@mui/material/Grid";
 import { useAuth, AuthProvider } from "../hooks/AuthProvider";
 
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
   const { token } = useAuth();
+  console.log(token);
   if (!token) {
     return <Navigate to="/" />;
   }
@@ -28,6 +30,7 @@ const AuthLayout = () => {
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route element={<AuthLayout />} path="/">
+      <Route element={<Login />} path="/" />
       <Route
         element={
           <ProtectedRoute>
