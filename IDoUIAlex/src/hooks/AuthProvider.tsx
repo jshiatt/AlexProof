@@ -22,6 +22,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [creds, setCreds] = React.useState<CreateUser>({});
   const navigate = useNavigate();
 
+  const { mutate: getUser } = useMutation(async () => {
+    setCreds({ userName: await call(LoginApi).loginGet() });
+  });
+
+  React.useEffect(() => {
+    if (storedValue) getUser();
+  }, []);
+
   const { mutate: login, isLoading } = useMutation(async () => {
     const result = await call(LoginApi).loginPost({ createUser: { ...creds } });
     setValue(result.token || "");

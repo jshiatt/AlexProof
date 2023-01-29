@@ -73,6 +73,38 @@ export class LoginApi extends runtime.BaseAPI {
 
     /**
      */
+    async loginGetRaw(): Promise<runtime.ApiResponse<string>> {
+        const queryParameters: runtime.HTTPQuery = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = typeof token === 'function' ? token("bearer", []) : token;
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/Login`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        });
+
+        return new runtime.TextApiResponse(response) as any;
+    }
+
+    /**
+     */
+    async loginGet(): Promise<string> {
+        const response = await this.loginGetRaw();
+        return await response.value();
+    }
+
+    /**
+     */
     async loginPostRaw(requestParameters: LoginPostRequest): Promise<runtime.ApiResponse<UserLogin>> {
         const queryParameters: runtime.HTTPQuery = {};
 

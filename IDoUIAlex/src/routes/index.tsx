@@ -12,10 +12,10 @@ import Login from "./login";
 import { QueryClient, QueryClientProvider } from "react-query";
 import Grid from "@mui/material/Grid";
 import { useAuth, AuthProvider } from "../hooks/AuthProvider";
+import { OrderProvider } from "./orders/orderContext";
 
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
   const { token } = useAuth();
-  console.log(token);
   if (!token) {
     return <Navigate to="/" />;
   }
@@ -34,7 +34,9 @@ const router = createBrowserRouter(
       <Route
         element={
           <ProtectedRoute>
-            <OrdersList />
+            <OrderProvider>
+              <OrdersList />
+            </OrderProvider>
           </ProtectedRoute>
         }
         path="/orders"

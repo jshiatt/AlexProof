@@ -52,10 +52,22 @@ export interface OrderDetail {
     createDateTime?: Date;
     /**
      * 
+     * @type {string}
+     * @memberof OrderDetail
+     */
+    createUser?: string | null;
+    /**
+     * 
      * @type {Date}
      * @memberof OrderDetail
      */
     updateDateTime?: Date | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof OrderDetail
+     */
+    updateUser?: string | null;
 }
 
 export function OrderDetailFromJSON(json: any): OrderDetail {
@@ -72,7 +84,9 @@ export function OrderDetailFromJSONTyped(json: any, ignoreDiscriminator: boolean
         'orderType': !exists(json, 'orderType') ? undefined : OrderTypeFromJSON(json['orderType']),
         'customerName': !exists(json, 'customerName') ? undefined : json['customerName'],
         'createDateTime': !exists(json, 'createDateTime') ? undefined : (new Date(json['createDateTime'])),
+        'createUser': !exists(json, 'createUser') ? undefined : json['createUser'],
         'updateDateTime': !exists(json, 'updateDateTime') ? undefined : (json['updateDateTime'] === null ? null : new Date(json['updateDateTime'])),
+        'updateUser': !exists(json, 'updateUser') ? undefined : json['updateUser'],
     };
 }
 
@@ -89,7 +103,9 @@ export function OrderDetailToJSON(value?: OrderDetail | null): any {
         'orderType': OrderTypeToJSON(value.orderType),
         'customerName': value.customerName,
         'createDateTime': value.createDateTime === undefined ? undefined : (value.createDateTime.toISOString()),
+        'createUser': value.createUser,
         'updateDateTime': value.updateDateTime === undefined ? undefined : (value.updateDateTime === null ? null : value.updateDateTime.toISOString()),
+        'updateUser': value.updateUser,
     };
 }
 
