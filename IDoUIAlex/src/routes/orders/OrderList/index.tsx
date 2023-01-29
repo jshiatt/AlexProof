@@ -22,7 +22,10 @@ export default function OrderList({ orders, checkedOrders, setCheckedOrders, set
     <>
       {orders && orders.length > 0 ? (
         orders.map((o, i) => (
-          <Card key={i} sx={{ padding: "12px", marginBottom: i < orders.length - 1 ? "8px" : undefined }}>
+          <Card
+            key={i}
+            sx={{ padding: "12px", marginBottom: i < orders.length - 1 ? "8px" : undefined, overflow: "unset" }}
+          >
             <Grid container alignItems="center">
               <Grid item md={3} xs={6}>
                 <Grid container alignItems="center" wrap="nowrap">

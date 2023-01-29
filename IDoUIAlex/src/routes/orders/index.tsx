@@ -55,7 +55,7 @@ export default function OrdersList() {
 
   return (
     <PageContainer>
-      <Grid container direction="column" sx={{ flex: "1 1 auto", padding: "20px" }}>
+      <Grid container direction="column" sx={{ height: "calc(100vh - 64px)", padding: "20px" }} wrap="nowrap">
         <Grid container alignItems="center" wrap="nowrap">
           <TextField
             variant="outlined"
@@ -148,7 +148,7 @@ export default function OrdersList() {
           container
           direction="column"
           wrap="nowrap"
-          sx={{ flex: "1 1 auto", overflowY: "auto", padding: "20px", backgroundColor: "#EAEAEA" }}
+          style={{ height: "calc(100vh - 156px)", overflowY: "auto", padding: "20px", backgroundColor: "#EAEAEA" }}
         >
           <OrderList
             orders={orders?.orders || undefined}
