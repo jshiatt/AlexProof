@@ -18,11 +18,11 @@
  * @enum {string}
  */
 export enum OrderType {
-    NUMBER_0 = 0,
-    NUMBER_1 = 1,
-    NUMBER_2 = 2,
-    NUMBER_3 = 3,
-    NUMBER_4 = 4
+    Standard = 0,
+    SaleOrder = 1,
+    PurchaseOrder = 2,
+    TransferOrder = 3,
+    ReturnOrder = 4
 }
 
 export function OrderTypeFromJSON(json: any): OrderType {

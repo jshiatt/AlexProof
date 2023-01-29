@@ -13,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System;
@@ -61,6 +62,8 @@ namespace AlexProof
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
+                c.SchemaFilter<XEnumNamesSchemaFilter>();
+                c.ParameterFilter<XEnumNamesParameterFilter>();
                 c.AddSecurityDefinition("bearer", new OpenApiSecurityScheme
                 {
                     Type = SecuritySchemeType.Http,
@@ -122,6 +125,80 @@ namespace AlexProof
             {
                 [scheme] = new List<string>()
             });
+        }
+    }
+
+    public class XEnumNamesSchemaFilter : ISchemaFilter
+    {
+        public void Apply(OpenApiSchema schema, SchemaFilterContext context)
+        {
+            var typeInfo = context.Type;
+            if (typeInfo.IsEnum)
+            {
+                AddNames(typeInfo, schema);
+            }
+            else if (schema.Enum != null)
+            {
+                var names = schema.Enum.Select(n => new OpenApiString(n.ToString()));
+                AddNames(names, schema);
+            }
+            else if (typeInfo.IsGenericType && !schema.Extensions.ContainsKey("x-enum-varnames"))
+            {
+                foreach (var genericArgumentType in typeInfo.GetGenericArguments())
+                {
+                    if (genericArgumentType.IsEnum)
+                    {
+                        AddNames(genericArgumentType, schema);
+                    }
+                }
+            }
+        }
+
+        private void AddNames(Type type, OpenApiSchema schema)
+        {
+            var names = Enum.GetNames(type).Select(name => new OpenApiString(name));
+            AddNames(names, schema);
+
+        }
+
+        private void AddNames(IEnumerable<OpenApiString> names, OpenApiSchema schema)
+        {
+            var arr = new OpenApiArray();
+
+            arr.AddRange(names);
+            schema.Extensions.Add("x-enum-varnames", arr);
+        }
+    }
+
+    public class XEnumNamesParameterFilter : IParameterFilter
+    {
+        public void Apply(OpenApiParameter parameter, ParameterFilterContext context)
+        {
+            var typeInfo = context.ParameterInfo.ParameterType;
+            if (typeInfo.IsEnum)
+            {
+                AddNames(context.ParameterInfo.ParameterType, parameter);
+            }
+            else if (typeInfo.IsGenericType && !parameter.Extensions.ContainsKey("x-enum-varnames2"))
+            {
+                foreach (var genericArgumentType in typeInfo.GetGenericArguments())
+                {
+                    if (genericArgumentType.IsEnum)
+                    {
+                        AddNames(genericArgumentType, parameter);
+                    }
+                }
+            }
+        }
+
+        private void AddNames(Type type, OpenApiParameter parameter)
+        {
+            var names = Enum.GetNames(type).Select(name => new OpenApiString(name));
+
+            var arr = new OpenApiArray();
+
+            arr.AddRange(names);
+            parameter.Extensions.Add("x-enum-varnames2", arr);
         }
     }
 }

@@ -18,7 +18,13 @@ namespace DataAccess.Repositories
         {
             var orderQuery = _context.Set<Order>().Include(o => o.CreateUser).Include(o => o.UpdateUser).AsQueryable();
 
-            if (filters.OrderType.HasValue)
+            if (!string.IsNullOrEmpty(filters.Search))
+            {
+                orderQuery = orderQuery.Where(w => w.CreateUser.UserName.ToLower().Contains(filters.Search.ToLower())
+                    || w.UpdateUser.UserName.ToLower().Contains(filters.Search.ToLower())
+                    || w.CustomerName.ToLower().Contains(filters.Search.ToLower()));
+            }
+            else if (filters.OrderType.HasValue)
             {
                 orderQuery = orderQuery.Where(w => w.OrderType == filters.OrderType);
             }

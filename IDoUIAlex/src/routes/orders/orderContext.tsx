@@ -1,10 +1,14 @@
 import React from "react";
 import { FindOrders } from "../../../api/src";
 
-type Action = { type: "updateFilters"; payload: FindOrders } | { type: "reset" };
+type Action =
+  | { type: "updateFilters"; payload: FindOrders }
+  | { type: "reset" }
+  | { type: "updateTempFilters"; payload: FindOrders };
 type Dispatch = (action: Action) => void;
 type State = {
   filters: FindOrders;
+  tempFilters: FindOrders;
 };
 type OrderProviderProps = { children: React.ReactNode };
 
@@ -17,13 +21,19 @@ function orderReducer(state: State, action: Action): State {
       return { ...state, filters: { ...state.filters, ...action.payload } };
     }
     case "reset": {
-      return { ...state, filters: { page: 1, pageSize: 20 } };
+      return { ...state, filters: { page: 1, pageSize: 20 }, tempFilters: { page: 1, pageSize: 20 } };
+    }
+    case "updateTempFilters": {
+      return { ...state, tempFilters: { ...state.tempFilters, ...action.payload } };
     }
   }
 }
 
 function OrderProvider({ children }: OrderProviderProps) {
-  const [state, dispatch] = React.useReducer(orderReducer, { filters: { page: 1, pageSize: 20 } });
+  const [state, dispatch] = React.useReducer(orderReducer, {
+    filters: { page: 1, pageSize: 20 },
+    tempFilters: { page: 1, pageSize: 20 },
+  });
   return (
     <OrderStateContext.Provider value={state}>
       <OrderDispatchContext.Provider value={dispatch}>{children}</OrderDispatchContext.Provider>

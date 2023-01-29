@@ -34,6 +34,12 @@ export interface FindOrders {
     orderType?: OrderType;
     /**
      * 
+     * @type {string}
+     * @memberof FindOrders
+     */
+    search?: string | null;
+    /**
+     * 
      * @type {number}
      * @memberof FindOrders
      */
@@ -57,6 +63,7 @@ export function FindOrdersFromJSONTyped(json: any, ignoreDiscriminator: boolean)
     return {
         
         'orderType': !exists(json, 'orderType') ? undefined : OrderTypeFromJSON(json['orderType']),
+        'search': !exists(json, 'search') ? undefined : json['search'],
         'page': !exists(json, 'page') ? undefined : json['page'],
         'pageSize': !exists(json, 'pageSize') ? undefined : json['pageSize'],
     };
@@ -72,6 +79,7 @@ export function FindOrdersToJSON(value?: FindOrders | null): any {
     return {
         
         'orderType': OrderTypeToJSON(value.orderType),
+        'search': value.search,
         'page': value.page,
         'pageSize': value.pageSize,
     };
