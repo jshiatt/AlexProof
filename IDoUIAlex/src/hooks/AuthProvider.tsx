@@ -11,7 +11,9 @@ type AuthContext = {
   creds: CreateUser;
   setCreds: Setter<CreateUser>;
   login: UseMutateFunction<void, unknown, void, unknown>;
+  create: UseMutateFunction<void, unknown, void, unknown>;
   loginLoading: boolean;
+  createLoading: boolean;
   logout: VoidFunction;
 };
 
@@ -36,6 +38,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     navigate("/orders");
   });
 
+  const { mutate: create, isLoading: createLoading } = useMutation(async () => {
+    const result = await call(LoginApi).loginCreateUserPost({ createUser: { ...creds } });
+    setValue(result.token || "");
+    navigate("/orders");
+  });
+
   const logout = () => {
     setCreds({});
     setValue("");
@@ -49,7 +57,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setCreds,
       login,
       loginLoading: isLoading,
+      createLoading,
       logout,
+      create,
     }),
     [storedValue, creds, isLoading],
   );

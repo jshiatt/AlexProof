@@ -5,6 +5,7 @@ import Paper from "@mui/material/Paper";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import LoginForm from "./Login";
+import SignUpForm from "./SignUp";
 
 export default function Login() {
   const [tabValue, setTabValue] = React.useState(0);
@@ -38,7 +39,7 @@ export default function Login() {
             <Tab label="Sign In" />
             <Tab label="Sign Up" />
           </Tabs>
-          {tabValue === 0 ? <LoginForm /> : <></>}
+          {tabValue === 0 ? <LoginForm /> : <SignUpForm />}
         </Grid>
       </Paper>
     </Grid>
