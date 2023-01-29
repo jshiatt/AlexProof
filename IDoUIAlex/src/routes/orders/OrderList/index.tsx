@@ -4,9 +4,10 @@ import Card from "@mui/material/Card";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import Checkbox from "@mui/material/Checkbox";
-import { makeStyles } from "@mui/material";
 import { Setter } from "../../../types/setter";
 import moment from "moment";
+import IconButton from "@mui/material/IconButton";
+import Edit from "@mui/icons-material/Edit";
 
 interface OrderListProps {
   orders?: OrderDetail[];
@@ -19,9 +20,9 @@ export default function OrderList({ orders, checkedOrders, setCheckedOrders }: O
     <>
       {orders && orders.length > 0 ? (
         orders.map((o, i) => (
-          <Card key={i} sx={{ padding: "12px" }}>
+          <Card key={i} sx={{ padding: "12px", marginBottom: i < orders.length - 1 ? "8px" : undefined }}>
             <Grid container alignItems="center">
-              <Grid item xs={3}>
+              <Grid item md={3} xs={6}>
                 <Grid container alignItems="center" wrap="nowrap">
                   <Checkbox
                     checked={!!checkedOrders.find((or) => or.id === o.id)}
@@ -40,13 +41,13 @@ export default function OrderList({ orders, checkedOrders, setCheckedOrders }: O
                   </Grid>
                 </Grid>
               </Grid>
-              <Grid item xs={3}>
+              <Grid item md={3} xs={6}>
                 <Grid container direction="column">
                   <Typography sx={{ fontWeight: 400, color: "#878787" }}>Customer Name</Typography>
                   <Typography sx={{ fontWeight: 500, color: "#212121" }}>{o.customerName}</Typography>
                 </Grid>
               </Grid>
-              <Grid item xs={3}>
+              <Grid item md={3} xs={6}>
                 <Grid container direction="column">
                   <Typography sx={{ fontWeight: 400, color: "#878787" }}>Created By</Typography>
                   <Typography sx={{ fontWeight: 500, color: "#212121" }}>
@@ -54,12 +55,17 @@ export default function OrderList({ orders, checkedOrders, setCheckedOrders }: O
                   </Typography>
                 </Grid>
               </Grid>
-              <Grid item xs={3}>
-                <Grid container direction="column">
-                  <Typography sx={{ fontWeight: 400, color: "#878787" }}>Updated By</Typography>
-                  <Typography sx={{ fontWeight: 500, color: "#212121" }}>
-                    {o.updateUser ? `${o.updateUser} on ${moment(o.updateDateTime).format("MM/DD/YY")}` : "-"}
-                  </Typography>
+              <Grid item md={3} xs={6}>
+                <Grid container alignItems="center" wrap="nowrap">
+                  <Grid container direction="column">
+                    <Typography sx={{ fontWeight: 400, color: "#878787" }}>Updated By</Typography>
+                    <Typography sx={{ fontWeight: 500, color: "#212121" }}>
+                      {o.updateUser ? `${o.updateUser} on ${moment(o.updateDateTime).format("MM/DD/YY")}` : "-"}
+                    </Typography>
+                  </Grid>
+                  <IconButton sx={{ marginLeft: "auto" }}>
+                    <Edit />
+                  </IconButton>
                 </Grid>
               </Grid>
             </Grid>

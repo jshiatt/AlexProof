@@ -16,6 +16,13 @@ import InputLabel from "@mui/material/InputLabel";
 import { useOrderState, useOrderDispatch } from "./orderContext";
 import OrderList from "./OrderList";
 import Button from "@mui/material/Button";
+import AddOrder from "./AddOrder";
+import DeleteOrders from "./DeleteOrders";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import useTheme from "@mui/material/styles/useTheme";
+import Fab from "@mui/material/Fab";
+import Add from "@mui/icons-material/Add";
+import Delete from "@mui/icons-material/Delete";
 
 const orderTypeOptions = (Object.keys(OrderType).filter((s) => isNaN(Number(s))) as (keyof typeof OrderType)[]).map(
   (key) => ({
@@ -28,6 +35,10 @@ export default function OrdersList() {
   const state = useOrderState();
   const dispatch = useOrderDispatch();
   const [checkedOrders, setCheckedOrders] = React.useState<OrderDetail[]>([]);
+  const [open, setOpen] = React.useState(false);
+  const [deleteOpen, setDeleteOpen] = React.useState(false);
+  const theme = useTheme();
+  const small = useMediaQuery(theme.breakpoints.down("md"));
   const { data: orders } = useQuery(
     ["orders", state.filters],
     async () => {
@@ -96,16 +107,41 @@ export default function OrdersList() {
               ))}
             </Select>
           </FormControl>
-          <Grid item sx={{ marginLeft: "auto" }}>
-            <Grid container sx={{ marginLeft: "auto" }}>
-              <Button variant="contained" color="primary" sx={{ marginRight: "12px" }}>
-                Add Order
-              </Button>
-              <Button variant="outlined" color="error" disabled={checkedOrders.length === 0}>
-                {`Delete Order(s) ${checkedOrders.length > 0 ? `(${checkedOrders.length})` : ""}`}
-              </Button>
+          {!small ? (
+            <Grid item sx={{ marginLeft: "auto" }}>
+              <Grid container sx={{ marginLeft: "auto" }}>
+                <Button variant="contained" color="primary" sx={{ marginRight: "12px" }} onClick={() => setOpen(true)}>
+                  Add Order
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="error"
+                  disabled={checkedOrders.length === 0}
+                  onClick={() => setDeleteOpen(true)}
+                >
+                  {`Delete Order(s) ${checkedOrders.length > 0 ? `(${checkedOrders.length})` : ""}`}
+                </Button>
+              </Grid>
             </Grid>
-          </Grid>
+          ) : (
+            <>
+              <Fab
+                sx={{ position: "fixed", left: 8, bottom: 8, opacity: 0.7 }}
+                color="primary"
+                onClick={() => setOpen(true)}
+              >
+                <Add />
+              </Fab>
+              <Fab
+                sx={{ position: "fixed", right: 8, bottom: 8, opacity: 0.7 }}
+                color="error"
+                onClick={() => setDeleteOpen(true)}
+                disabled={checkedOrders.length === 0}
+              >
+                <Delete />
+              </Fab>
+            </>
+          )}
         </Grid>
         <Grid
           container
@@ -120,6 +156,13 @@ export default function OrdersList() {
           />
         </Grid>
       </Grid>
+      <AddOrder open={open} setOpen={setOpen} />
+      <DeleteOrders
+        open={deleteOpen}
+        setOpen={setDeleteOpen}
+        checkedOrders={checkedOrders}
+        setCheckedOrders={setCheckedOrders}
+      />
     </PageContainer>
   );
 }
